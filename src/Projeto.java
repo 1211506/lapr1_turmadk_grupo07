@@ -10,23 +10,22 @@ public class Projeto {
 
         String[] listaDeDatas = new String[numeroDeLinhas];
         int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
-       // listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(1,listaDeCasosNaoInfetados);
+        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(1,listaDeCasosNaoInfetados);
         int[] listaDeInfetados = new int[numeroDeLinhas];
-        //listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(2,listaDeInfetados);
+        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(2,listaDeInfetados);
         int[] listaDeHospitalizados = new int[numeroDeLinhas];
-        //listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(3,listaDeHospitalizados);
+        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(3,listaDeHospitalizados);
         int[] listaDeInternadosUCI = new int[numeroDeLinhas];
-        //listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(4,listaDeInternadosUCI);
+        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(4,listaDeInternadosUCI);
         int[] listaDeMortes = new int[numeroDeLinhas];
-        //listaDeMortes = PreencherValoresDosDadosPrimeiraFase(5,listaDeMortes);
-        System.out.println(numeroDeLinhas);
+        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(5,listaDeMortes);
 
         //por num modulo???
         if (args.length == 6 || args.length == 8) { // verificar se é um numero válido de argumentos
             for (int i = 0; i < args.length; i = i + 2) {
                 switch (args[i]){
                     case "-r":
-                        String resoluçãoTemporal = args[i+1];
+                        String resolucaoTemporal = args[i+1];
                         break;
                     case "-di":
                         String dataInicial = args[i+1];
@@ -53,20 +52,23 @@ public class Projeto {
 
 
     }
- /*   public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
+    public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
 
         String splitBy = ",";
         Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
         fin.next();
-        while (fin.next() != null) {
-            String line = fin.next();
+        while (fin.hasNextLine()) {
+            String line = fin.nextLine();
             String[] dados = line.split(splitBy);
+            for (int i = 0; i < dados.length; i++) {
+                System.out.println(dados[i]);
+            }
             if (tipoDeDado != 0) {
                 PreencherValorDosDadosSegundaFase(tipoDeDado, dados, listaDeDados);
             }
         }
         return listaDeDados;
-    }*/
+    }
     public static void PreencherValorDosDadosSegundaFase(int tiposDeDados, String[] dados, int[] listaDeDados){
         for (int i = 0; i < listaDeDados.length; i++) {
             listaDeDados[i] = Integer.parseInt(dados[tiposDeDados]);
@@ -76,6 +78,8 @@ public class Projeto {
 
     public static String[] PreencherListaDeDatas(int tipoDeDados,String[] dados, String[] listaDeDatas) {
 
+
+
         return dados;
     }
 
@@ -84,8 +88,9 @@ public class Projeto {
         Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
         int counter = 0;
 
-        while (fin.nextLine() != null){
+        while (fin.hasNextLine()){
             counter++;
+            fin.nextLine();
         }
         fin.close();
         return counter;
