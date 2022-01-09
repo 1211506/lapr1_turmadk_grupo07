@@ -6,7 +6,7 @@ public class Projeto {
     public static void main(String[] args) throws FileNotFoundException {
 
         //LerFicheiroCSV();
-        int numeroDeLinhas = ContarLinhasDoFicheiro() - 1;
+        int numeroDeLinhas = ContarLinhasDoFicheiro();
 
         String[] listaDeDatas = new String[numeroDeLinhas];
         int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
@@ -54,27 +54,24 @@ public class Projeto {
     }
     public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
 
+        int count = 0;
         String splitBy = ",";
         Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
-        fin.next();
+        fin.nextLine();
         while (fin.hasNextLine()) {
             String line = fin.nextLine();
             String[] dados = line.split(splitBy);
-            for (int i = 0; i < dados.length; i++) {
-                System.out.println(dados[i]);
-            }
-            if (tipoDeDado != 0) {
-                PreencherValorDosDadosSegundaFase(tipoDeDado, dados, listaDeDados);
-            }
-        }
+            count++;
+            PreencherValorDosDadosSegundaFase(tipoDeDado, dados, listaDeDados,count);
+                }
+
         return listaDeDados;
     }
-    public static void PreencherValorDosDadosSegundaFase(int tiposDeDados, String[] dados, int[] listaDeDados){
-        for (int i = 0; i < listaDeDados.length; i++) {
-            listaDeDados[i] = Integer.parseInt(dados[tiposDeDados]);
-            System.out.println(listaDeDados[i]);
+    public static void PreencherValorDosDadosSegundaFase(int tiposDeDados, String[] dados, int[] listaDeDados, int posicao){
+        listaDeDados[posicao] = Integer.parseInt(dados[tiposDeDados]);
+        System.out.println(listaDeDados[posicao]);
         }
-    }
+
 
     public static String[] PreencherListaDeDatas(int tipoDeDados,String[] dados, String[] listaDeDatas) {
 
