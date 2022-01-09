@@ -86,9 +86,19 @@ public class Projeto {
         return listaDeDatas;
     }
 
-    public static void PreencherListaDeDatasSegundaFase(String[] dados, String[] listaDeDatas){
+        public static int ProcurarValorDoDia (String data, int [] listaDeValores, String [] listaDeDatas){
+        int posiçãoDaData = 0;
+        for (int i = 0; i < listaDeDatas.length; i++) {
+            if (listaDeDatas[i].equals(data)){
+                posiçãoDaData = i;
+            }
+        }
 
+        int valor = listaDeValores[posiçãoDaData];
+
+        return valor;
     }
+
 
     public static int ContarLinhasDoFicheiro() throws FileNotFoundException {
 
