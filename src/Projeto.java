@@ -75,17 +75,16 @@ public class Projeto {
 
         if (modoTemporal == 1 && indexFinal - indexInicio > 7) {
             int primeiraSegundaFeira = ProcurarPrimeiraSegundaFeira(indexInicio, indexFinal, mensagemSegundaFeiraReferencia, listaDeDatas);
-            System.out.println(primeiraSegundaFeira);
             if (primeiraSegundaFeira == -1) {
                 System.out.println("A partir da primeira segunda-feira não existem dias suficientes para a analise semanal");
             }else {
-                    int[] numeroTotalInfetados = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeInfetados);
-                    int[] numeroTotalDeHospitalizados = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeHospitalizados);
-                    int[] numeroTotalDeInternadosNaUCI = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeInternadosUCI);
-                    int[] numeroTotalDeObitos = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeMortes);
+                    int[] numeroTotalInfetados = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeInfetados,listaDeDatas);
+                    int[] numeroTotalDeHospitalizados = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeHospitalizados,listaDeDatas);
+                    int[] numeroTotalDeInternadosNaUCI = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeInternadosUCI,listaDeDatas);
+                    int[] numeroTotalDeObitos = SomarDadosDaSemana(primeiraSegundaFeira, indexFinal, listaDeMortes,listaDeDatas);
 
                 for (int i = 0; i < (indexFinal - primeiraSegundaFeira )/7 ; i++) {
-                    System.out.print("Na semana de " + format2.format(listaDeDatas[primeiraSegundaFeira + (7 * i)]) + " a " + format2.format(listaDeDatas[primeiraSegundaFeira + 7 + (7 * i)]));
+                    System.out.print("Na semana de " + (listaDeDatas[primeiraSegundaFeira + (7 * i)]) + " a " + (listaDeDatas[primeiraSegundaFeira + 7 + (7 * i)]));
                     System.out.println("houve: " + numeroTotalInfetados[i] + " infetados, " + numeroTotalDeHospitalizados[i] + " hospitalizados, " + numeroTotalDeInternadosNaUCI[i] + " internados na UCI, " + numeroTotalDeObitos[i] + " obitos.");
                 }
 
@@ -95,7 +94,6 @@ public class Projeto {
         if (modoTemporal == 1 && indexFinal - indexInicio < 7){
             System.out.println("O periodo de tempo escolhido é muito curto para analise semanal.");
         }
-
 
 
 // FIM DA ANALISE SEMANAL
@@ -195,17 +193,17 @@ public class Projeto {
         while (!(mensagemSegundaFeiraReferencia.equals(format2.format(listaDeDatas[indexInicial]))) && indexInicial <= indexFinal ){
             indexInicial++;
         }
+
         if (indexFinal - indexInicial > 7){
             return indexInicial;
         }
-
         return -1;
     }
 
-    public static int[] SomarDadosDaSemana(int primeiraSegundaFeira, int indexFinal, int[] dados){
+    public static int[] SomarDadosDaSemana(int primeiraSegundaFeira, int indexFinal, int[] dados, Date[] datas){
 
         int[] somas = new int[(indexFinal - primeiraSegundaFeira)/ 7];
-        for (int i = 0; i < (indexFinal - primeiraSegundaFeira )/7; i++) {
+        for (int i = 0; i <= (indexFinal - primeiraSegundaFeira )/7; i++) {
             int count = 0;
             int soma = 0;
             while (count < 7){
