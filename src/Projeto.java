@@ -1,4 +1,5 @@
 import java.io.*;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -7,8 +8,12 @@ import java.util.Scanner;
 public class Projeto {
 
     static final SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+    static final DateFormat format2 = new SimpleDateFormat("EEEE");
 
     public static void main(String[] args) throws FileNotFoundException, ParseException {
+
+        String segundaFeiraString = "2022-01-10";
+        Date segundaFeiraData = formato.parse(segundaFeiraString);
 
         String dataInicial = "";
         String dataFinal = "";
