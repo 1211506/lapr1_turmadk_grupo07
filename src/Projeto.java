@@ -1,24 +1,31 @@
 import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Projeto {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    static final SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+    static final DateFormat format2 = new SimpleDateFormat("EEEE");
+
+    public static void main(String[] args) throws FileNotFoundException, ParseException {
 
         int numeroDeLinhas = ContarLinhasDoFicheiro() - 1;
 
-        String[] listaDeDatas = new String[numeroDeLinhas];
+        Date[] listaDeDatas = new Date[numeroDeLinhas];
         listaDeDatas = PreencherListaDeDatas(listaDeDatas);
         int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
-        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(1, listaDeCasosNaoInfetados);
+        listaDeCasosNaoInfetados = PreencherValoresDosDados(1, listaDeCasosNaoInfetados);
         int[] listaDeInfetados = new int[numeroDeLinhas];
-        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(2, listaDeInfetados);
+        listaDeInfetados = PreencherValoresDosDados(2, listaDeInfetados);
         int[] listaDeHospitalizados = new int[numeroDeLinhas];
-        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(3, listaDeHospitalizados);
+        listaDeHospitalizados = PreencherValoresDosDados(3, listaDeHospitalizados);
         int[] listaDeInternadosUCI = new int[numeroDeLinhas];
-        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(4, listaDeInternadosUCI);
+        listaDeInternadosUCI = PreencherValoresDosDados(4, listaDeInternadosUCI);
         int[] listaDeMortes = new int[numeroDeLinhas];
-        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(5, listaDeMortes);
+        listaDeMortes = PreencherValoresDosDados(5, listaDeMortes);
 
         //por num modulo???
         if (args.length == 6 || args.length == 8) { // verificar se é um numero válido de argumentos
@@ -38,21 +45,23 @@ public class Projeto {
 
             ContarLinhasDoFicheiro();
 
-            if (VerificarExtensãoFicheiro(args[args.length - 2]).equals("csv")) {
+            if (VerificarExtensaoFicheiro(args[args.length - 2]).equals("csv")) {
                 String ficheiroEntrada = args[args.length - 2];
             } else System.out.println("Ficheiro de entrada inválido");
 
-            if (VerificarExtensãoFicheiro(args[args.length - 1]).equals("txt")) {
+            if (VerificarExtensaoFicheiro(args[args.length - 1]).equals("txt")) {
                 String ficheiroSaida = args[args.length - 1];
 
             } else System.out.println("Ficheiro de saida inválido");
 
         } else System.out.println("Quantidade de argumentos inválida");
 
-
+        String segundaFeiraString = "2022-01-10";
+        Date segundaFeiraData = formato.parse(segundaFeiraString);
+        System.out.println(format2.format(segundaFeiraData));
     }
 
-    public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
+    public static int[] PreencherValoresDosDados(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
 
         int count = 0;
         String splitBy = ",";
@@ -69,7 +78,7 @@ public class Projeto {
         return listaDeDados;
     }
 
-    public static String[] PreencherListaDeDatas(String[] listaDeDatas) throws FileNotFoundException {
+    public static Date[] PreencherListaDeDatas(Date[] listaDeDatas) throws FileNotFoundException, ParseException {
         int count = 0;
         String splitBy = ",";
         Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
@@ -77,7 +86,7 @@ public class Projeto {
         while (fin.hasNextLine()) {
             String line = fin.nextLine();
             String[] dados = line.split(splitBy);
-            listaDeDatas[count] = dados[0];
+            listaDeDatas[count] = formato.parse(dados[0]);
             count++;
 
         }
@@ -86,7 +95,7 @@ public class Projeto {
         return listaDeDatas;
     }
 
-        public static int ProcurarValorDoDia (String data, int [] listaDeValores, String [] listaDeDatas){
+        public static int ProcurarValorNoTempo(String data, int [] listaDeValores, String [] listaDeDatas){
         int posiçãoDaData = 0;
         for (int i = 0; i < listaDeDatas.length; i++) {
             if (listaDeDatas[i].equals(data)){
@@ -113,7 +122,7 @@ public class Projeto {
         return counter;
     }
 
-    public static String VerificarExtensãoFicheiro(String nomeFicheiro) {
+    public static String VerificarExtensaoFicheiro(String nomeFicheiro) {
         String ext = "";
 
         int i = nomeFicheiro.lastIndexOf('.');
@@ -123,5 +132,6 @@ public class Projeto {
 
         return ext;
     }
+
 
 }
