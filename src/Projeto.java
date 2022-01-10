@@ -1,13 +1,25 @@
 import java.io.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Projeto {
 
-    public static void main(String[] args) throws FileNotFoundException {
+    static final SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
+    static final DateFormat format2 = new SimpleDateFormat("EEEE");
 
+    public static void main(String[] args) throws FileNotFoundException, ParseException {
+
+        String segundaFeiraString = "2022-01-10";
+        Date segundaFeiraData = formato.parse(segundaFeiraString);
+
+        String dataInicial = "";
+        String dataFinal = "";
         int numeroDeLinhas = ContarLinhasDoFicheiro() - 1;
 
-        String[] listaDeDatas = new String[numeroDeLinhas];
+        Date[] listaDeDatas = new Date[numeroDeLinhas];
         listaDeDatas = PreencherListaDeDatas(listaDeDatas);
         int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
         listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(1, listaDeCasosNaoInfetados);
@@ -28,15 +40,14 @@ public class Projeto {
                         String resolucaoTemporal = args[i + 1];
                         break;
                     case "-di":
-                        String dataInicial = args[i + 1];
+                        dataInicial = args[i + 1];
                         break;
                     case "-df":
-                        String dataFinal = args[i + 1];
+                        dataFinal = args[i + 1];
                         break;
                 }
             }
 
-            ContarLinhasDoFicheiro();
 
             if (VerificarExtensãoFicheiro(args[args.length - 2]).equals("csv")) {
                 String ficheiroEntrada = args[args.length - 2];
@@ -49,7 +60,7 @@ public class Projeto {
 
         } else System.out.println("Quantidade de argumentos inválida");
 
-
+         //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
     }
 
     public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
@@ -69,7 +80,7 @@ public class Projeto {
         return listaDeDados;
     }
 
-    public static String[] PreencherListaDeDatas(String[] listaDeDatas) throws FileNotFoundException {
+    public static Date[] PreencherListaDeDatas(Date[] listaDeDatas) throws FileNotFoundException, ParseException {
         int count = 0;
         String splitBy = ",";
         Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
@@ -77,7 +88,7 @@ public class Projeto {
         while (fin.hasNextLine()) {
             String line = fin.nextLine();
             String[] dados = line.split(splitBy);
-            listaDeDatas[count] = dados[0];
+            listaDeDatas[count] = formato.parse(dados[0]);
             count++;
 
         }
@@ -86,19 +97,37 @@ public class Projeto {
         return listaDeDatas;
     }
 
-        public static int ProcurarValorDoDia (String data, int [] listaDeValores, String [] listaDeDatas){
-        int posiçãoDaData = 0;
+    public static int ProcurarPosicaoData (String data, Date [] listaDeDatas) throws ParseException {
+        int posiçãoDaData = -1;
         for (int i = 0; i < listaDeDatas.length; i++) {
-            if (listaDeDatas[i].equals(data)){
+            if (listaDeDatas[i].equals(formato.parse(data))){
                 posiçãoDaData = i;
             }
         }
 
-        int valor = listaDeValores[posiçãoDaData];
+        return posiçãoDaData;
+    }
+    public static int ProcurarValorDoDia (String data, int [] listaDeValores, Date [] listaDeDatas) throws ParseException {
+        int valor;
+
+        int posiçãoDaData = ProcurarPosicaoData(data, listaDeDatas);
+
+        if (posiçãoDaData == -1) {
+            valor = -1;
+        }
+        else valor = listaDeValores[posiçãoDaData];
 
         return valor;
     }
 
+    public static void MostrarValoresDoDia (String data, int [] listaDeInfetados, int [] listaDeHospitalizados, int [] listaDeInternadosUCI, int [] listaDeMortes, Date [] listaDeDatas) throws ParseException {
+        int posiçãoDaData = ProcurarPosicaoData(data, listaDeDatas);
+
+        if (posiçãoDaData == -1){
+            System.out.println("Data Inválida.");
+        } else System.out.println("No dia " + data + " foram registados " + listaDeInfetados[posiçãoDaData] + " infetados, " + listaDeHospitalizados[posiçãoDaData] + " hospitalizados, " + listaDeInternadosUCI[posiçãoDaData] + " internados em UCI e " + listaDeMortes[posiçãoDaData] + " óbitos.");
+
+    }
 
     public static int ContarLinhasDoFicheiro() throws FileNotFoundException {
 
