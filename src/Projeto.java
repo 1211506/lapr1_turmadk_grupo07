@@ -14,7 +14,9 @@ public class Projeto {
 
         String segundaFeiraString = "2022-01-10";
         Date segundaFeiraData = formato.parse(segundaFeiraString);
+        String mensagemSegundaFeiraReferencia = format2.format(segundaFeiraData);
 
+        String resolucaoTemporal = "";
         String dataInicial = "";
         String dataFinal = "";
         int numeroDeLinhas = ContarLinhasDoFicheiro() - 1;
@@ -37,7 +39,7 @@ public class Projeto {
             for (int i = 0; i < args.length; i = i + 2) {
                 switch (args[i]) {
                     case "-r":
-                        String resolucaoTemporal = args[i + 1];
+                        resolucaoTemporal = args[i + 1];
                         break;
                     case "-di":
                         dataInicial = args[i + 1];
@@ -47,6 +49,8 @@ public class Projeto {
                         break;
                 }
             }
+
+
 
 
             if (VerificarExtensãoFicheiro(args[args.length - 2]).equals("csv")) {
@@ -61,6 +65,33 @@ public class Projeto {
         } else System.out.println("Quantidade de argumentos inválida");
 
          //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
+
+        int modoTemporal = Integer.parseInt(resolucaoTemporal);
+        int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+        int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+
+
+//ANALISE SEMANAL
+
+        if (modoTemporal == 1 && indexFinal - indexInicio > 7) {
+            int primeiraSegundaFeira = ProcurarPrimeiraSegundaFeira(indexInicio, indexFinal, mensagemSegundaFeiraReferencia, listaDeDatas);
+            if (primeiraSegundaFeira == -1) {
+                System.out.println("A partir da primeira segunda-feira não existem dias suficientes para a analise semanal");
+            }else {
+                int numeroTotalInfetados = SomarDadosDaSemana();
+                int numeroTotalDeHospitalizados = SomarDadosDaSemana();
+                int numeroTotalDeInternadosNaUCI = SomarDadosDaSemana();
+                int numeroTotalDeObitos = SomarDadosDaSemana();
+            }
+
+        }
+        if (modoTemporal == 1 && indexFinal - indexInicio < 7){
+            System.out.println("O periodo de tempo escolhido é muito curto para analise semanal.");
+        }
+
+
+
+// FIM DA ANALISE SEMANAL
     }
 
     public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
@@ -151,6 +182,20 @@ public class Projeto {
         }
 
         return ext;
+    }
+
+    public static int ProcurarPrimeiraSegundaFeira (int indexInicial,int indexFinal,String mensagemSegundaFeiraReferencia, Date[] listaDeDatas){
+        while (mensagemSegundaFeiraReferencia != format2.format(listaDeDatas[indexInicial]) && indexInicial <= indexFinal ){
+            indexInicial++;
+        }
+        if (indexFinal - indexInicial > 7){
+            return indexInicial;
+        }else
+        return -1;
+    }
+
+    public static int SomarDadosDaSemana(){
+        return 0;
     }
 
 }
