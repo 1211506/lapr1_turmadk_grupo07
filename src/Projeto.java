@@ -243,6 +243,7 @@ public class Projeto {
             System.out.println("No dia " + formato.format(listaDeDatas[i])  + " foram registados " + listaDeInfetados[i] + " infetados, " + listaDeHospitalizados[i] + " hospitalizados, " + listaDeInternadosUCI[i] + " internados em UCI e " + listaDeMortes[i] + " óbitos.");
         }
     }
+    //por acabar
     //FIM DA ANALISE DIARIA
 }
 
