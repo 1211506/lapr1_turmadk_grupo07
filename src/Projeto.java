@@ -72,12 +72,20 @@ public class Projeto {
 
 
 //ANALISE SEMANAL
-
-        ModoSemanalMostrarDados(modoTemporal,indexFinal,indexInicio,mensagemSegundaFeiraReferencia,listaDeDatas,listaDeInfetados,listaDeHospitalizados,listaDeInternadosUCI,listaDeMortes);
-
+        if (modoTemporal == 1) {
+            ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+        }
 
 // FIM DA ANALISE SEMANAL
+
+
+// ANALISE DIARIA
+//modos desnecessarios
+        if (modoTemporal == 0){
+            ModoDiario(indexFinal, indexInicio, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+        }
     }
+// FIM ANALISE DIARIA
 
     public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
 
@@ -136,14 +144,6 @@ public class Projeto {
         return valor;
     }
 
-    public static void MostrarValoresDoDia (String data, int [] listaDeInfetados, int [] listaDeHospitalizados, int [] listaDeInternadosUCI, int [] listaDeMortes, Date [] listaDeDatas) throws ParseException {
-        int posiçãoDaData = ProcurarPosicaoData(data, listaDeDatas);
-
-        if (posiçãoDaData == -1){
-            System.out.println("Data Inválida.");
-        } else System.out.println("No dia " + data + " foram registados " + listaDeInfetados[posiçãoDaData] + " infetados, " + listaDeHospitalizados[posiçãoDaData] + " hospitalizados, " + listaDeInternadosUCI[posiçãoDaData] + " internados em UCI e " + listaDeMortes[posiçãoDaData] + " óbitos.");
-
-    }
 
     public static int ContarLinhasDoFicheiro() throws FileNotFoundException {
 
@@ -168,9 +168,11 @@ public class Projeto {
 
         return ext;
     }
+    //ANALISE SEMANAL
+//problemas com segunda a domingo, porem funciona de segunda a segunda
 
-    public static void ModoSemanalMostrarDados(int modoTemporal, int indexFinal,int indexInicio,String mensagemSegundaFeiraReferencia,Date[] listaDeDatas,int[] listaDeInfetados,int[] listaDeHospitalizados,int[] listaDeInternadosUCI,int[] listaDeMortes) {
-        if (modoTemporal == 1 && indexFinal - indexInicio > 7) {
+    public static void ModoSemanalMostrarDados(int indexFinal,int indexInicio,String mensagemSegundaFeiraReferencia,Date[] listaDeDatas,int[] listaDeInfetados,int[] listaDeHospitalizados,int[] listaDeInternadosUCI,int[] listaDeMortes) {
+        if (indexFinal - indexInicio >= 7) {
             int primeiraSegundaFeiraIndex = ProcurarPrimeiraSegundaFeira(indexInicio, indexFinal, mensagemSegundaFeiraReferencia, listaDeDatas);
             if (primeiraSegundaFeiraIndex == -1) {
                 System.out.println("A partir da primeira segunda-feira não existem dias suficientes para a analise semanal");
@@ -185,16 +187,20 @@ public class Projeto {
                     System.out.println(" houve: " + numeroTotalInfetados[i] + " infetados, " + numeroTotalDeHospitalizados[i] + " hospitalizados, " + numeroTotalDeInternadosNaUCI[i] + " internados na UCI, " + numeroTotalDeObitos[i] + " obitos.");
                 }
                 System.out.println();
-                for (int i = 0; i < ((indexFinal - primeiraSegundaFeiraIndex) / 7) - 1; i++) {
-                    System.out.print("Entre as semanas de " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * i)]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * i) - 1]))));
-                    System.out.println(" e " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * (i + 1))]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * (i+1)) - 1]))));
-                    System.out.println("houve " + (numeroTotalInfetados[i+1] - numeroTotalInfetados[i]) + " infetados, " + (numeroTotalDeHospitalizados[i + 1] - numeroTotalInfetados[i]) + " hospitalizados, " + (numeroTotalDeInternadosNaUCI[i+1] - numeroTotalDeInternadosNaUCI[i]) + " internados na UCI, " + (numeroTotalDeObitos[i + 1] - numeroTotalDeObitos[i]) + " obitos");
+                if ((indexFinal - primeiraSegundaFeiraIndex)/ 7 > 1) {
+                    for (int i = 0; i < ((indexFinal - primeiraSegundaFeiraIndex) / 7) - 1; i++) {
+                        System.out.print("Entre as semanas de " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * i)]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * i) - 1]))));
+                        System.out.println(" e " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * (i + 1))]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * (i + 1)) - 1]))));
+                        System.out.println("houve " + (numeroTotalInfetados[i + 1] - numeroTotalInfetados[i]) + " infetados, " + (numeroTotalDeHospitalizados[i + 1] - numeroTotalInfetados[i]) + " hospitalizados, " + (numeroTotalDeInternadosNaUCI[i + 1] - numeroTotalDeInternadosNaUCI[i]) + " internados na UCI, " + (numeroTotalDeObitos[i + 1] - numeroTotalDeObitos[i]) + " obitos");
+                    }
+                }else {
+                    System.out.println("Como só foi selecionada uma semana não é possivel fazer comparações");
                 }
 
             }
 
         }
-        if (modoTemporal == 1 && indexFinal - indexInicio < 7) {
+        if (indexFinal - indexInicio < 7) {
             System.out.println("O periodo de tempo escolhido é muito curto para analise semanal.");
         }
     }
@@ -203,8 +209,7 @@ public class Projeto {
         while (!(mensagemSegundaFeiraReferencia.equals(format2.format(listaDeDatas[indexInicial]))) && indexInicial <= indexFinal ){
             indexInicial++;
         }
-
-        if (indexFinal - indexInicial > 7){
+        if (indexFinal - indexInicial >= 6){
             return indexInicial;
         }
         return -1;
@@ -224,4 +229,20 @@ public class Projeto {
         }
         return somas;
     }
+
+    // FIM DA ANALISE SEMANAL
+
+    //ANALISE DIARIA
+    public static void ModoDiario(int indexFinal, int indexInicio, Date[] listaDeDatas, int[] listaDeInfetados, int[] listaDeHospitalizados, int[] listaDeInternadosUCI, int[] listaDeMortes) throws ParseException {
+            MostrarValoresDoDia(listaDeInfetados,listaDeHospitalizados,listaDeInternadosUCI,listaDeMortes,listaDeDatas,indexFinal,indexInicio);
+    }
+
+    public static void MostrarValoresDoDia (int [] listaDeInfetados, int [] listaDeHospitalizados, int [] listaDeInternadosUCI, int [] listaDeMortes, Date [] listaDeDatas,int indexFinal, int indexInicio) throws ParseException {
+
+        for (int i = indexInicio; i < indexFinal; i++) {
+            System.out.println("No dia " + formato.format(listaDeDatas[i])  + " foram registados " + listaDeInfetados[i] + " infetados, " + listaDeHospitalizados[i] + " hospitalizados, " + listaDeInternadosUCI[i] + " internados em UCI e " + listaDeMortes[i] + " óbitos.");
+        }
+    }
+    //FIM DA ANALISE DIARIA
 }
+
