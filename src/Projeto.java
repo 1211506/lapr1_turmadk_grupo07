@@ -19,20 +19,9 @@ public class Projeto {
         String resolucaoTemporal = "";
         String dataInicial = "";
         String dataFinal = "";
-        int numeroDeLinhas = ContarLinhasDoFicheiro() - 1;
+        String ficheiroEntrada = "";
+        String ficheiroSaida = "";
 
-        Date[] listaDeDatas = new Date[numeroDeLinhas];
-        listaDeDatas = PreencherListaDeDatas(listaDeDatas);
-        int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
-        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(1, listaDeCasosNaoInfetados);
-        int[] listaDeInfetados = new int[numeroDeLinhas];
-        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(2, listaDeInfetados);
-        int[] listaDeHospitalizados = new int[numeroDeLinhas];
-        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(3, listaDeHospitalizados);
-        int[] listaDeInternadosUCI = new int[numeroDeLinhas];
-        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(4, listaDeInternadosUCI);
-        int[] listaDeMortes = new int[numeroDeLinhas];
-        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(5, listaDeMortes);
 
         //por num modulo???
         if (args.length == 6 || args.length == 8) { // verificar se é um numero válido de argumentos
@@ -54,17 +43,33 @@ public class Projeto {
 
 
             if (VerificarExtensãoFicheiro(args[args.length - 2]).equals("csv")) {
-                String ficheiroEntrada = args[args.length - 2];
+                ficheiroEntrada = args[args.length - 2];
             } else System.out.println("Ficheiro de entrada inválido");
 
             if (VerificarExtensãoFicheiro(args[args.length - 1]).equals("txt")) {
-                String ficheiroSaida = args[args.length - 1];
+                ficheiroSaida = args[args.length - 1];
 
             } else System.out.println("Ficheiro de saida inválido");
 
         } else System.out.println("Quantidade de argumentos inválida");
 
-         //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
+        //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
+
+
+        int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
+
+        Date[] listaDeDatas = new Date[numeroDeLinhas];
+        listaDeDatas = PreencherListaDeDatas(ficheiroEntrada, listaDeDatas);
+        int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
+        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 1, listaDeCasosNaoInfetados);
+        int[] listaDeInfetados = new int[numeroDeLinhas];
+        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 2, listaDeInfetados);
+        int[] listaDeHospitalizados = new int[numeroDeLinhas];
+        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 3, listaDeHospitalizados);
+        int[] listaDeInternadosUCI = new int[numeroDeLinhas];
+        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 4, listaDeInternadosUCI);
+        int[] listaDeMortes = new int[numeroDeLinhas];
+        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 5, listaDeMortes);
 
         int modoTemporal = Integer.parseInt(resolucaoTemporal);
         int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
@@ -82,16 +87,17 @@ public class Projeto {
 // ANALISE DIARIA
 //modos desnecessarios
         if (modoTemporal == 0){
-            ModoDiario(indexFinal, indexInicio, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+            MostrarValoresDoDia(listaDeInfetados,listaDeHospitalizados,listaDeInternadosUCI,listaDeMortes,listaDeDatas,indexFinal,indexInicio);
+            CompararDias(listaDeInfetados,listaDeHospitalizados,listaDeInternadosUCI,listaDeMortes,listaDeDatas,indexFinal,indexInicio);
         }
     }
 // FIM ANALISE DIARIA
 
-    public static int[] PreencherValoresDosDadosPrimeiraFase(int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
+    public static int[] PreencherValoresDosDadosPrimeiraFase(String ficheiroEntrada, int tipoDeDado, int[] listaDeDados) throws FileNotFoundException {
 
         int count = 0;
         String splitBy = ",";
-        Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
+        Scanner fin = new Scanner(new File(ficheiroEntrada));
         fin.nextLine();
         while (fin.hasNextLine()) {
             String line = fin.nextLine();
@@ -104,10 +110,10 @@ public class Projeto {
         return listaDeDados;
     }
 
-    public static Date[] PreencherListaDeDatas(Date[] listaDeDatas) throws FileNotFoundException, ParseException {
+    public static Date[] PreencherListaDeDatas(String ficheiroEntrada, Date[] listaDeDatas) throws FileNotFoundException, ParseException {
         int count = 0;
         String splitBy = ",";
-        Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
+        Scanner fin = new Scanner(new File(ficheiroEntrada));
         fin.nextLine();
         while (fin.hasNextLine()) {
             String line = fin.nextLine();
@@ -145,9 +151,9 @@ public class Projeto {
     }
 
 
-    public static int ContarLinhasDoFicheiro() throws FileNotFoundException {
+    public static int ContarLinhasDoFicheiro(String ficheiroEntrada) throws FileNotFoundException {
 
-        Scanner fin = new Scanner(new File("exemploRegistoNumerosCovid19.csv"));
+        Scanner fin = new Scanner(new File(ficheiroEntrada));
         int counter = 0;
 
         while (fin.hasNextLine()) {
@@ -233,17 +239,53 @@ public class Projeto {
     // FIM DA ANALISE SEMANAL
 
     //ANALISE DIARIA
-    public static void ModoDiario(int indexFinal, int indexInicio, Date[] listaDeDatas, int[] listaDeInfetados, int[] listaDeHospitalizados, int[] listaDeInternadosUCI, int[] listaDeMortes) throws ParseException {
-            MostrarValoresDoDia(listaDeInfetados,listaDeHospitalizados,listaDeInternadosUCI,listaDeMortes,listaDeDatas,indexFinal,indexInicio);
-    }
 
     public static void MostrarValoresDoDia (int [] listaDeInfetados, int [] listaDeHospitalizados, int [] listaDeInternadosUCI, int [] listaDeMortes, Date [] listaDeDatas,int indexFinal, int indexInicio) throws ParseException {
 
-        for (int i = indexInicio; i < indexFinal; i++) {
+        for (int i = indexInicio; i < indexFinal + 1; i++) {
             System.out.println("No dia " + formato.format(listaDeDatas[i])  + " foram registados " + listaDeInfetados[i] + " infetados, " + listaDeHospitalizados[i] + " hospitalizados, " + listaDeInternadosUCI[i] + " internados em UCI e " + listaDeMortes[i] + " óbitos.");
         }
     }
-    //por acabar
-    //FIM DA ANALISE DIARIA
-}
 
+     public static void CompararDias (int [] listaDeInfetados, int [] listaDeHospitalizados, int [] listaDeInternadosUCI, int [] listaDeMortes, Date [] listaDeDatas,int indexFinal, int indexInicio){
+         for (int i = indexInicio; i < indexFinal; i++) {
+             System.out.println("Entre os dias "+formato.format(listaDeDatas[i])+" e "+formato.format(listaDeDatas[i + 1])+" houve ");
+             System.out.print((listaDeInfetados[i + 1]-listaDeInfetados[i])+ " infetados, " + (listaDeHospitalizados[i + 1]-listaDeHospitalizados[i])+ " hospitalizados, ");
+             System.out.println((listaDeInternadosUCI[i + 1]- listaDeInternadosUCI[i])+" internados na UCI, "+ (listaDeMortes[i+1]-listaDeMortes[i])+" obitos.");
+         }
+     }
+    //FIM DA ANALISE DIARIA
+
+    // ANALISE MENSAL
+    public static int ProcurarPrimeiroDiaMes(int indexInicial, int indexFinal, Date [] listaDeDatas){
+        String [] data = formato.format(listaDeDatas[indexInicial]).split("-");
+        while (!data[2].equals("01") && indexInicial <= indexFinal){
+            indexInicial++;
+            data = formato.format(listaDeDatas[indexInicial]).split("-");
+        }
+
+        if (data[2].equals("01")){
+            return indexInicial;
+        }
+
+        return -1;
+    }
+
+    public static int SomarDadosDoMes(int indexPrimeiroDiaMes, int indexFinal, int[] dados, Date [] listaDeDatas){
+        String [] data = formato.format(listaDeDatas[indexPrimeiroDiaMes]).split("-");
+        String mes = data[1];
+        int qtMeses = 1;
+        while (indexPrimeiroDiaMes != indexFinal){
+            indexPrimeiroDiaMes++;
+            data = formato.format(listaDeDatas[indexPrimeiroDiaMes]).split("-");
+            if (!data[1].equals(mes)){
+                qtMeses++;
+            }
+            mes = data[1];
+        }
+
+        return qtMeses;
+
+    }
+    // FIM ANALISE MENSAL POR ACABAR
+}
