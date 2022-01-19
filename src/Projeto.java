@@ -2,6 +2,8 @@ import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
@@ -98,9 +100,7 @@ public class Projeto {
         int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
         int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
         int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
-        System.out.println(indexInicio1);
         int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
-        System.out.println(indexFinal1);
         int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
         int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
 
@@ -127,7 +127,12 @@ public class Projeto {
                         break;
                     }
                     case "2": {
-                        System.out.println(SomarDadosDoMes(ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas), ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas), listaDeHospitalizados, listaDeDatas));
+                        int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
+                        int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
+                        int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
+                        if (qtMeses > 1) {
+                            ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                        } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
                         break;
                     }
                 }
@@ -152,10 +157,14 @@ public class Projeto {
 
         //ANALISE MENSAL
         if (modoTemporal == 2) {
-            System.out.println(SomarDadosDoMes(ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas), ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas), listaDeHospitalizados, listaDeDatas));
+            int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
+            int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
+            int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
+            if (qtMeses > 1) {
+                ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+            } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
+
         }
-
-
         // FIM ANALISE MENSAL
 
         //COMPARAÇÕES 2.2
@@ -289,7 +298,7 @@ public class Projeto {
                 int[] numeroTotalInfetados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInfetados);
                 int[] numeroTotalDeHospitalizados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeHospitalizados);
                 int[] numeroTotalDeInternadosNaUCI = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInternadosUCI);
-                int[] numeroTotalDeObitos = SomarDadosDaSemanaObitos(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
+                int[] numeroTotalDeObitos = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
 
                 for (int i = 0; i < (indexFinal - primeiraSegundaFeiraIndex) / 7; i++) {
                     System.out.print("Na semana de " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * i)]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * i) - 1]))));
@@ -324,24 +333,7 @@ public class Projeto {
         return -1;
     }
 
-
     public static int[] SomarDadosDaSemana(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
-
-        int[] somas = new int[(indexFinal - primeiraSegundaFeiraIndex)/7];
-        for (int i = 0; i < somas.length; i++) {
-            int soma = 0;
-            soma = dados[primeiraSegundaFeiraIndex + 6] - dados[primeiraSegundaFeiraIndex];
-            somas[i]= soma;
-            primeiraSegundaFeiraIndex = primeiraSegundaFeiraIndex + 7;
-            }
-
-        return somas;
-
-        }
-
-
-
-    public static int[] SomarDadosDaSemanaObitos(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
 
         int[] somas = new int[((indexFinal - primeiraSegundaFeiraIndex)/ 7)];
         int numeroDeSemanas = ((indexFinal - primeiraSegundaFeiraIndex )/7);
@@ -377,53 +369,118 @@ public class Projeto {
     //FIM DA ANALISE DIARIA
 
     // ANALISE MENSAL
-    public static int ProcurarPrimeiroDiaMes(int indexInicial, int indexFinal, Date [] listaDeDatas){
-        String [] data = formato.format(listaDeDatas[indexInicial]).split("-");
-        while (!data[2].equals("01") && indexInicial <= indexFinal){
+    public static int ProcurarPrimeiroDiaMes(int indexInicial, int indexFinal, Date[] listaDeDatas) {
+        String[] data = formato.format(listaDeDatas[indexInicial]).split("-");
+        while (!data[2].equals("01") && indexInicial < indexFinal) {
             indexInicial++;
             data = formato.format(listaDeDatas[indexInicial]).split("-");
         }
 
-        if (data[2].equals("01")){
-            return indexInicial;
-        }
 
-        return -1;
+        return indexInicial;
     }
 
-    public static int ProcurarUltimoDiaMes(int indexInicial, int indexFinal, Date [] listaDeDatas){
-        int indexTeste = indexFinal + 1;
-        String [] data = formato.format(listaDeDatas[indexTeste]).split("-");
-        String [] data1 = formato.format(listaDeDatas[indexFinal]).split("-");
-
-        if (data[1].equals(data1[1])) {
-            while (data1[1].equals(data[1]) && indexFinal >= indexInicial){
+    public static int ProcurarUltimoDiaMes(int indexInicial, int indexFinal, Date[] listaDeDatas) {
+        DateTimeFormatter formato4 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String data2 = formato.format(listaDeDatas[indexFinal]);
+        LocalDate ultimoDiaMes = LocalDate.parse(data2, DateTimeFormatter.ofPattern("yyyy-M-d"));
+        ultimoDiaMes = ultimoDiaMes.withDayOfMonth(ultimoDiaMes.getMonth().length(ultimoDiaMes.isLeapYear()));
+        String ultimoDiaMes1 = ultimoDiaMes.format(formato4);
+        String[] data = formato.format(listaDeDatas[indexFinal]).split("-");
+        String[] data1 = formato.format(listaDeDatas[indexFinal]).split("-");
+        if (!(ultimoDiaMes1.equals(data2))){
+            while (data1[1].equals(data[1]) && indexFinal > indexInicial) {
                 indexFinal--;
                 data1 = formato.format(listaDeDatas[indexFinal]).split("-");
             }
         }
 
-
         return indexFinal;
     }
 
-    public static int SomarDadosDoMes(int indexPrimeiroDiaMes, int indexFinal, int[] dados, Date [] listaDeDatas){
-        String [] data = formato.format(listaDeDatas[indexPrimeiroDiaMes]).split("-");
+    public static int CalcularQuantidadeDeMesesParaAvaliar(int indexPrimeiroDiaMes, int indexFinal, Date[] listaDeDatas) {
+        String[] data = formato.format(listaDeDatas[indexPrimeiroDiaMes]).split("-");
         String mes = data[1];
         int qtMeses = 1;
-        Calendar.getInstance().getActualMaximum(Calendar.DAY_OF_MONTH);
-        while (indexPrimeiroDiaMes != indexFinal){
+        while (indexPrimeiroDiaMes != indexFinal) {
             indexPrimeiroDiaMes++;
             data = formato.format(listaDeDatas[indexPrimeiroDiaMes]).split("-");
-            if (!data[1].equals(mes)){
+            if (!data[1].equals(mes)) {
                 qtMeses++;
             }
             mes = data[1];
         }
-
         return qtMeses;
+    }
+
+    public static int SomarDadosObitos(int indexInicial, int indexFinal, int[] dados, Date[] listaDeDatas) {
+        int soma = 0;
+        String[] data = formato.format(listaDeDatas[indexInicial]).split("-");
+        String mes = data[1];
+        while (data[1].equals(mes) && indexInicial < indexFinal) {
+            soma = soma + dados[indexInicial];
+            indexInicial++;
+            data = formato.format(listaDeDatas[indexInicial]).split("-");
+        }
+        return soma;
+    }
+
+    public static int SomarDadosMes(int indexInicial, int indexFinal, int[] dados, Date[] listaDeDatas) {
+        int indexInicialOriginal = indexInicial;
+        String[] data = formato.format(listaDeDatas[indexInicial]).split("-");
+        String mes = data[1];
+        while (data[1].equals(mes) && indexInicial < indexFinal) {
+            indexInicial++;
+            data = formato.format(listaDeDatas[indexInicial]).split("-");
+        }
+        int variacao = dados[indexInicial] - dados[indexInicialOriginal];
+        return variacao;
+    }
+
+
+
+    public static void ModoMensalMostrarDados(int indexInicio, int indexFinal, int qtMeses, Date[] listaDeDatas, int[] listaDeInfetados, int[] listaDeHospitalizados, int[] listaDeInternadosUCI, int[] listaDeMortes) {
+        int[] listaDeDados = new int[4];
+        int[] listaDeDados1 = new int[4];
+        for (int i = 1; i < qtMeses; i++) {
+            String[] data = formato.format(listaDeDatas[indexInicio]).split("-");
+            String mes = data[1];
+            listaDeDados[0] = SomarDadosMes(indexInicio, indexFinal, listaDeInfetados, listaDeDatas);
+            listaDeDados[1] = SomarDadosMes(indexInicio, indexFinal, listaDeHospitalizados, listaDeDatas);
+            listaDeDados[2] = SomarDadosMes(indexInicio, indexFinal, listaDeInternadosUCI, listaDeDatas);
+            listaDeDados[3] = SomarDadosObitos(indexInicio, indexFinal, listaDeMortes, listaDeDatas);
+            while (data[1].equals(mes) && indexInicio <= indexFinal) {
+                indexInicio++;
+                data = formato.format(listaDeDatas[indexInicio]).split("-");
+            }
+
+            String[] data2 = formato.format(listaDeDatas[indexInicio]).split("-");
+            String mes2 = data2[1];
+            listaDeDados1[0] = SomarDadosMes(indexInicio, indexFinal, listaDeInfetados, listaDeDatas);
+            listaDeDados1[1] = SomarDadosMes(indexInicio, indexFinal, listaDeHospitalizados, listaDeDatas);
+            listaDeDados1[2] = SomarDadosMes(indexInicio, indexFinal, listaDeInternadosUCI, listaDeDatas);
+            listaDeDados1[3] = SomarDadosObitos(indexInicio, indexFinal, listaDeMortes, listaDeDatas);
+
+            int diferencaInfetados = listaDeDados1[0] - listaDeDados[0];
+            int diferencaHospitalizados = listaDeDados1[1] - listaDeDados[1];
+            int diferencaUCI = listaDeDados1[2] - listaDeDados[2];
+            int diferencaObitos = listaDeDados1[3] - listaDeDados[3];
+
+
+            System.out.println("Entre os meses " + mes + " e " + mes2 + " houve uma alteração de " + diferencaInfetados + " infetados");
+            System.out.println("Entre os meses " + mes + " e " + mes2 + " houve uma alteração de " + diferencaHospitalizados + " hospitalizados");
+            System.out.println("Entre os meses " + mes + " e " + mes2 + " houve uma alteração de " + diferencaUCI + " hospitalizados em UCI");
+            System.out.println("Entre os meses " + mes + " e " + mes2 + " houve uma alteração de " + diferencaObitos + " óbitos");
+            System.out.println();
+
+        }
+
+
 
     }
+
+
+
     // FIM ANALISE MENSAL POR ACABAR
 
     public static void CompararPeriodosDeTempo(int indexInicio1,int indexFinal1,int indexInicio2,int indexFinal2,int[] arrayDeDados){
@@ -472,17 +529,5 @@ public class Projeto {
         return medias;
 
     }
-
-    public static void CalcularDesvioPadrao(double[] media,int[] arrayDeDados,int indexInicial1,int indexFinal1,int indexInicial2, int indexFinal2){
-
-    }
-
-    //public static double[] CalcularDesvio(double[] media,int[] arrayDeDados,int indexInicial1,int indexFinal1,int indexInicial2, int indexFinal2){
-
-        double[] desvio = new double[3];
-
-
-
-   // }
 
 }
