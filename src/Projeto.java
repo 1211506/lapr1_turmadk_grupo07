@@ -289,7 +289,7 @@ public class Projeto {
                 int[] numeroTotalInfetados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInfetados);
                 int[] numeroTotalDeHospitalizados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeHospitalizados);
                 int[] numeroTotalDeInternadosNaUCI = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInternadosUCI);
-                int[] numeroTotalDeObitos = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
+                int[] numeroTotalDeObitos = SomarDadosDaSemanaObitos(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
 
                 for (int i = 0; i < (indexFinal - primeiraSegundaFeiraIndex) / 7; i++) {
                     System.out.print("Na semana de " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * i)]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * i) - 1]))));
@@ -324,7 +324,24 @@ public class Projeto {
         return -1;
     }
 
+
     public static int[] SomarDadosDaSemana(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
+
+        int[] somas = new int[(indexFinal - primeiraSegundaFeiraIndex)/7];
+        for (int i = 0; i < somas.length; i++) {
+            int soma = 0;
+            soma = dados[primeiraSegundaFeiraIndex + 6] - dados[primeiraSegundaFeiraIndex];
+            somas[i]= soma;
+            primeiraSegundaFeiraIndex = primeiraSegundaFeiraIndex + 7;
+            }
+
+        return somas;
+
+        }
+
+
+
+    public static int[] SomarDadosDaSemanaObitos(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
 
         int[] somas = new int[((indexFinal - primeiraSegundaFeiraIndex)/ 7)];
         int numeroDeSemanas = ((indexFinal - primeiraSegundaFeiraIndex )/7);
@@ -455,5 +472,17 @@ public class Projeto {
         return medias;
 
     }
+
+    public static void CalcularDesvioPadrao(double[] media,int[] arrayDeDados,int indexInicial1,int indexFinal1,int indexInicial2, int indexFinal2){
+
+    }
+
+    //public static double[] CalcularDesvio(double[] media,int[] arrayDeDados,int indexInicial1,int indexFinal1,int indexInicial2, int indexFinal2){
+
+        double[] desvio = new double[3];
+
+
+
+   // }
 
 }
