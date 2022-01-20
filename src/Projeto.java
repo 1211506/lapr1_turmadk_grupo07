@@ -1,10 +1,11 @@
+import com.sun.source.doctree.IndexTree;
+
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -21,7 +22,8 @@ public class Projeto {
         Date segundaFeiraData = formato.parse(segundaFeiraString);
         String mensagemSegundaFeiraReferencia = formato2.format(segundaFeiraData);
 
-        String resolucaoTemporal = "";
+
+        String resolucaoTemporal = "-1";
         String dataInicial = "";
         String dataFinal = "";
         String dataInicial1 = "";
@@ -33,7 +35,7 @@ public class Projeto {
 
 
         //por num modulo???
-        if (args.length >= 6 || args.length == 8) { // verificar se é um numero válido de argumentos
+        if (args.length >= 6) { // verificar se é um numero válido de argumentos
             for (int i = 0; i < args.length; i = i + 2) {
                 switch (args[i]) {
                     case "-r": {
@@ -81,6 +83,11 @@ public class Projeto {
         //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
 
 
+
+        if (args.length < 1){
+            ficheiroEntrada = "exemploRegistoNumerosCovid19.csv";
+        }
+
         int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
 
         Date[] listaDeDatas = new Date[numeroDeLinhas];
@@ -96,48 +103,120 @@ public class Projeto {
         int[] listaDeMortes = new int[numeroDeLinhas];
         listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 5, listaDeMortes);
 
-        int modoTemporal = Integer.parseInt(resolucaoTemporal);
-        int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
-        int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
-        int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
-        int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
-        int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
-        int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+
+
+
+        if(args.length > 0) {
+            int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+            int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+            int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+            int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+            int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+            int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+        }
+
+        if (args.length < 1) {
+            System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
+            System.out.println("Se quiser sair introduza o comando sair");
+            String comando = "";
+            while (!(comando.equals("sair"))) {
+                System.out.println("1) visualizar o número total de infetados.");
+                System.out.println("2) comparar o número de casos");
+                comando = sc.nextLine();
+                switch (comando){
+                    case "1":{
+                        System.out.println("Introduza a data inicial na forma dd-MM-aaaa");
+                        dataInicial = sc.nextLine();
+                        int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+                        System.out.println("Introduza a data final na forma dd-MM-aaaa");
+                        dataFinal = sc.nextLine();
+                        int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+                        System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
+                        comando = sc.nextLine();
+                        switch (comando) {
+                            case "0": {
+                                MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                                MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                                System.out.println();
+                                break;
+                            }
+                            case "1": {
+                                ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                                break;
+                            }
+                            case "2": {
+                                int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
+                                int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
+                                int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
+                                if (qtMeses > 1) {
+                                    ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                                } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    case "2":{
+                        System.out.println("Introduza a data inicial do primeiro periodo temporal na forma dd-MM-aaaa");
+                        dataInicial1 = sc.nextLine();
+                        int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+                        System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
+                        dataFinal1 = sc.nextLine();
+                        int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+                        System.out.println("Introduza a data inicial do segundo periodo temporal na forma dd-MM-aaaa");
+                        dataInicial2 = sc.nextLine();
+                        int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+                        System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
+                        dataFinal2 = sc.nextLine();
+                        int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+                        double[] medias = new double[3];
+                        double[] desvioPadrao = new double[3];
+                        System.out.println();
+                        System.out.println("infetados");
+                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
+                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInfetados);
+                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeInfetados,indexInicio1,indexInicio2);
+                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
+                        System.out.println();
+                        System.out.println("hospitalizados");
+                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeHospitalizados);
+                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeHospitalizados,indexInicio1,indexInicio2);
+                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
+                        System.out.println();
+                        System.out.println("internados na UCI");
+                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInternadosUCI);
+                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeInternadosUCI,indexInicio1,indexInicio2);
+                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
+                        System.out.println();
+                        System.out.println("obitos");
+                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeMortes);
+                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeMortes,indexInicio1,indexInicio2);
+                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
+                        System.out.println();
+                    }
+                }
+
+            }
+        }
+
+
+            int modoTemporal = Integer.parseInt(resolucaoTemporal);;
+
+
 
 
         //System.out.println(ProcurarValorDoDia("2020-04-06", listaDeCasosNaoInfetados, listaDeDatas));
 
         //System.out.println(ProcurarPrimeiraSegundaFeira(indexInicio, indexFinal, mensagemSegundaFeiraReferencia, listaDeDatas));
 
-        if (args.length < 1) {
-            System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
-            System.out.println("Se quiser sair introduza o comando sair");
-            String comando = sc.nextLine();
-            while (!(comando.equals("sair"))) {
-                System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
-                switch (comando) {
-                    case "0": {
-                        MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-                        MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-                        System.out.println();
-                        break;
-                    }
-                    case "1": {
-                        ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
-                        break;
-                    }
-                    case "2": {
-                        int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
-                        int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
-                        int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
-                        if (qtMeses > 1) {
-                            ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
-                        } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
-                        break;
-                    }
-                }
-            }
-        }
+
 
 //ANALISE SEMANAL
         if (modoTemporal == 1) {
@@ -167,29 +246,39 @@ public class Projeto {
         }
         // FIM ANALISE MENSAL
 
+
         //COMPARAÇÕES 2.2
-        if (args.length > 1) {
+        if (args.length > 0) {
             double[] medias = new double[3];
+            double[] desvioPadrao = new double[3];
             System.out.println();
             System.out.println("infetados");
             CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
             medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInfetados);
+            desvioPadrao = CalcularDesvioPadrao(medias,listaDeInfetados,indexInicio1,indexInicio2);
             System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
             System.out.println();
             System.out.println("hospitalizados");
             CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
             medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeHospitalizados);
+            desvioPadrao = CalcularDesvioPadrao(medias,listaDeHospitalizados,indexInicio1,indexInicio2);
             System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
             System.out.println();
             System.out.println("internados na UCI");
             CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
             medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInternadosUCI);
+            desvioPadrao = CalcularDesvioPadrao(medias,listaDeInternadosUCI,indexInicio1,indexInicio2);
             System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
             System.out.println();
             System.out.println("obitos");
             CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
             medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeMortes);
+            desvioPadrao = CalcularDesvioPadrao(medias,listaDeMortes,indexInicio1,indexInicio2);
             System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
+            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
             System.out.println();
 
         }
@@ -241,14 +330,24 @@ public class Projeto {
 
     public static int ProcurarPosicaoData (String data, Date [] listaDeDatas) throws ParseException {
         int posiçãoDaData = -1;
-        for (int i = 0; i < listaDeDatas.length; i++) {
-            if (listaDeDatas[i].equals(formato.parse(data))){
-                posiçãoDaData = i;
+        String [] valoresData = data.split("-");
+        if (valoresData[0].length() != 4){
+            for (int i = 0; i < listaDeDatas.length; i++) {
+                if (listaDeDatas[i].equals(formato3.parse(data))){
+                    posiçãoDaData = i;
+                }
+            }
+        } else {
+            for (int i = 0; i < listaDeDatas.length; i++) {
+                if (listaDeDatas[i].equals(formato.parse(data))){
+                    posiçãoDaData = i;
+                }
             }
         }
 
         return posiçãoDaData;
     }
+
     public static int ProcurarValorDoDia (String data, int [] listaDeValores, Date [] listaDeDatas) throws ParseException {
         int valor;
 
@@ -298,7 +397,7 @@ public class Projeto {
                 int[] numeroTotalInfetados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInfetados);
                 int[] numeroTotalDeHospitalizados = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeHospitalizados);
                 int[] numeroTotalDeInternadosNaUCI = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeInternadosUCI);
-                int[] numeroTotalDeObitos = SomarDadosDaSemana(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
+                int[] numeroTotalDeObitos = SomarDadosDaSemanaObitos(primeiraSegundaFeiraIndex, indexFinal, listaDeMortes);
 
                 for (int i = 0; i < (indexFinal - primeiraSegundaFeiraIndex) / 7; i++) {
                     System.out.print("Na semana de " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + (7 * i)]) + " a " + (formato.format(listaDeDatas[primeiraSegundaFeiraIndex + 7 + (7 * i) - 1]))));
@@ -333,7 +432,20 @@ public class Projeto {
         return -1;
     }
 
-    public static int[] SomarDadosDaSemana(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
+    public static int[] SomarDadosDaSemana (int primeiraSegundaFeiraIndex,int indexFinal, int[] dados){
+        int[] somas = new int[((indexFinal - primeiraSegundaFeiraIndex)/ 7)];
+        for (int i = 0; i < somas.length; i++) {
+            int soma = 0;
+            soma = dados[primeiraSegundaFeiraIndex + 6] - dados[primeiraSegundaFeiraIndex];
+            somas[i] = soma;
+            primeiraSegundaFeiraIndex = primeiraSegundaFeiraIndex + 7;
+        }
+
+        return somas;
+
+    }
+
+    public static int[] SomarDadosDaSemanaObitos(int primeiraSegundaFeiraIndex, int indexFinal, int[] dados){
 
         int[] somas = new int[((indexFinal - primeiraSegundaFeiraIndex)/ 7)];
         int numeroDeSemanas = ((indexFinal - primeiraSegundaFeiraIndex )/7);
@@ -522,12 +634,80 @@ public class Projeto {
         media3 = media3 / count;
 
 
-        double[] medias = {media1,media2,media3};
+        double[] mediasECounter = {media1,media2,media3,count};
 
         System.out.println();
 
-        return medias;
+        return mediasECounter;
 
     }
+
+    public static double[] CalcularDesvioPadrao(double[] medias, int[] dados, int indexInicio1, int indexInicio2){
+
+    double[] variacao=CalcularVariacao(medias,dados,indexInicio1,indexInicio2);
+    double[] desvioPadrao = new double[3];
+
+        for (int i = 0; i < desvioPadrao.length; i++) {
+            desvioPadrao[i] = Math.sqrt(variacao[i]);
+        }
+
+    return desvioPadrao;
+
+    }
+
+    public static double[] CalcularVariacao(double[] medias, int[] dados, int indexInicio1, int indexInicio2){
+
+
+        double[] variacao = new double[3];
+        double[] desvio = new double[(int)medias[3]];
+        double somaVariacao = 0;
+        int index1Aux = indexInicio1;
+        int index2Aux = indexInicio2;
+
+
+        for (int i = 0; i < desvio.length ; i++) {
+            desvio[i] = medias[0] - dados[indexInicio1];
+            indexInicio1++;
+        }
+
+        for (int i = 0; i < desvio.length; i++) {
+            somaVariacao = (desvio[i] * desvio[i]) + somaVariacao;
+        }
+
+        variacao[0] = somaVariacao/desvio.length;
+        somaVariacao = 0;
+
+        for (int i = 0; i < desvio.length ; i++) {
+            desvio[i] = medias[1] - dados[indexInicio2];
+            indexInicio2++;
+        }
+
+        for (int i = 0; i < desvio.length; i++) {
+            somaVariacao = (desvio[i] * desvio[i]) + somaVariacao;
+        }
+
+        variacao[1] = somaVariacao/ desvio.length;
+        somaVariacao = 0;
+
+
+        for (int i = 0; i < desvio.length ; i++) {
+            desvio[i] = medias[2] - (dados[index2Aux] - dados[index1Aux]);
+            index2Aux++;
+            index1Aux++;
+        }
+
+
+
+        for (int i = 0; i < desvio.length; i++) {
+            somaVariacao = (desvio[i] * desvio[i]) + somaVariacao;
+        }
+
+        variacao[2] = somaVariacao/ desvio.length;
+
+        return variacao;
+    }
+
+
+
 
 }
