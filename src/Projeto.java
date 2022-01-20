@@ -1,5 +1,3 @@
-import com.sun.source.doctree.IndexTree;
-
 import java.io.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,6 +21,12 @@ public class Projeto {
         String mensagemSegundaFeiraReferencia = formato2.format(segundaFeiraData);
 
 
+        int indexInicio = 0;
+        int indexFinal = 0;
+        int indexInicio1 = 0;
+        int indexFinal1 = 0;
+        int indexInicio2 = 0;
+        int indexFinal2 = 0;
         String resolucaoTemporal = "-1";
         String dataInicial = "";
         String dataFinal = "";
@@ -85,7 +89,8 @@ public class Projeto {
 
 
         if (args.length < 1){
-            ficheiroEntrada = "exemploRegistoNumerosCovid19.csv";
+            System.out.println("Introduza o nome do ficheiro");
+            ficheiroEntrada = sc.nextLine();
         }
 
         int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
@@ -107,12 +112,12 @@ public class Projeto {
 
 
         if(args.length > 0) {
-            int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
-            int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
-            int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
-            int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
-            int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
-            int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+            indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+            indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+            indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+            indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+            indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+            indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
         }
 
         if (args.length < 1) {
@@ -127,10 +132,10 @@ public class Projeto {
                     case "1":{
                         System.out.println("Introduza a data inicial na forma dd-MM-aaaa");
                         dataInicial = sc.nextLine();
-                        int indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+                        indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
                         System.out.println("Introduza a data final na forma dd-MM-aaaa");
                         dataFinal = sc.nextLine();
-                        int indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+                        indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
                         System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
                         comando = sc.nextLine();
                         switch (comando) {
@@ -159,16 +164,16 @@ public class Projeto {
                     case "2":{
                         System.out.println("Introduza a data inicial do primeiro periodo temporal na forma dd-MM-aaaa");
                         dataInicial1 = sc.nextLine();
-                        int indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+                        indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
                         System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
                         dataFinal1 = sc.nextLine();
-                        int indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+                        indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
                         System.out.println("Introduza a data inicial do segundo periodo temporal na forma dd-MM-aaaa");
                         dataInicial2 = sc.nextLine();
-                        int indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+                        indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
                         System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
                         dataFinal2 = sc.nextLine();
-                        int indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+                        indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
                         double[] medias = new double[3];
                         double[] desvioPadrao = new double[3];
                         System.out.println();
@@ -202,21 +207,11 @@ public class Projeto {
                         System.out.println();
                     }
                 }
-
             }
         }
 
 
-            int modoTemporal = Integer.parseInt(resolucaoTemporal);;
-
-
-
-
-        //System.out.println(ProcurarValorDoDia("2020-04-06", listaDeCasosNaoInfetados, listaDeDatas));
-
-        //System.out.println(ProcurarPrimeiraSegundaFeira(indexInicio, indexFinal, mensagemSegundaFeiraReferencia, listaDeDatas));
-
-
+        int modoTemporal = Integer.parseInt(resolucaoTemporal);;
 
 //ANALISE SEMANAL
         if (modoTemporal == 1) {
@@ -586,9 +581,6 @@ public class Projeto {
             System.out.println();
 
         }
-
-
-
     }
 
 
@@ -644,14 +636,14 @@ public class Projeto {
 
     public static double[] CalcularDesvioPadrao(double[] medias, int[] dados, int indexInicio1, int indexInicio2){
 
-    double[] variacao=CalcularVariacao(medias,dados,indexInicio1,indexInicio2);
-    double[] desvioPadrao = new double[3];
+        double[] variacao=CalcularVariacao(medias,dados,indexInicio1,indexInicio2);
+        double[] desvioPadrao = new double[3];
 
         for (int i = 0; i < desvioPadrao.length; i++) {
             desvioPadrao[i] = Math.sqrt(variacao[i]);
         }
 
-    return desvioPadrao;
+        return desvioPadrao;
 
     }
 
@@ -706,8 +698,4 @@ public class Projeto {
 
         return variacao;
     }
-
-
-
-
 }
