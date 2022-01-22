@@ -20,13 +20,23 @@ public class Projeto {
         Date segundaFeiraData = formato.parse(segundaFeiraString);
         String mensagemSegundaFeiraReferencia = formato2.format(segundaFeiraData);
 
-
-        int indexInicio = 0;
-        int indexFinal = 0;
-        int indexInicio1 = 0;
-        int indexFinal1 = 0;
-        int indexInicio2 = 0;
-        int indexFinal2 = 0;
+        int indexInicio = -1;
+        int indexFinal = -1;
+        int indexInicio1 = -1;
+        int indexFinal1 = -1;
+        int indexInicio2 = -1;
+        int indexFinal2 = -1;
+        boolean modoPrevisao = false;
+        boolean existeArgumentoR = false;
+        boolean existeArgumentoT = false;
+        boolean ficheirosValidos = false;
+        boolean dataInicialExiste = false;
+        boolean dataFinalExiste = false;
+        boolean dataInicialExiste1 = false;
+        boolean dataFinalExiste1 = false;
+        boolean dataInicialExiste2 = false;
+        boolean dataFinalExiste2 = false;
+        boolean argumentosValidos = false;
         String resolucaoTemporal = "-1";
         String dataInicial = "";
         String dataFinal = "";
@@ -34,251 +44,525 @@ public class Projeto {
         String dataFinal1 = "";
         String dataInicial2 = "";
         String dataFinal2 = "";
+        String ficheiroEntradaTotal = "";
         String ficheiroEntrada = "";
         String ficheiroSaida = "";
+        String ficheiroMatriz = "";
+        String dataPrevisao = "";
 
 
-        //por num modulo???
-        if (args.length >= 6) { // verificar se é um numero válido de argumentos
+        /****************************************************************
+         *                                                              *
+         *                INICIO MODO NÃO INTERATIVO                    *
+         *                                                              *
+         ****************************************************************/
+
+        if (args.length >= 5 && args.length <= 20) { // verificar se é um numero válido de argumentos
             for (int i = 0; i < args.length; i = i + 2) {
                 switch (args[i]) {
                     case "-r": {
                         resolucaoTemporal = args[i + 1];
+                        existeArgumentoR = true;
                         break;
                     }
                     case "-di": {
                         dataInicial = args[i + 1];
+                        dataInicialExiste = true;
                         break;
                     }
                     case "-df": {
                         dataFinal = args[i + 1];
+                        dataFinalExiste = true;
                         break;
                     }
                     case "-di1": {
                         dataInicial1 = args[i + 1];
+                        dataInicialExiste1 = true;
                         break;
                     }
                     case "-df1": {
                         dataFinal1 = args[i + 1];
+                        dataFinalExiste1 = true;
                         break;
                     }
                     case "-di2": {
                         dataInicial2 = args[i + 1];
+                        dataInicialExiste2 = true;
                         break;
                     }
                     case "-df2": {
                         dataFinal2 = args[i + 1];
+                        dataFinalExiste2 = true;
+                        break;
                     }
+                    case "-T": {
+                        dataPrevisao = args[i + 1];
+                        existeArgumentoT = true;
+                    }
+
                 }
             }
 
+            if (existeArgumentoR == true && existeArgumentoT == false) {
+                File ficheiroEntradaTemp = new File(args[args.length - 2]);
+                File ficheiroSaidaTemp = new File(args[args.length - 1]);
+                if (ficheiroEntradaTemp.exists() && ficheiroSaidaTemp.exists()) {
+                    ficheiroEntrada = args[args.length - 2];
+                    ficheiroSaida = args[args.length - 1];
+                    ficheirosValidos = true;
+                } else {
+                    System.out.println("Os ficheiros introduzidos não foram encontrados.");
+                }
+                if (dataInicialExiste == true && dataFinalExiste == true && dataInicialExiste1 == true && dataFinalExiste1 == true && dataInicialExiste2 == true && dataFinalExiste2 == true){
+                    argumentosValidos = true;
+                } else {
+                    System.out.println("Argumentos inválidos! Utilize um dos seguintes sintaxes:");
+                    System.out.println();
+                    System.out.println("java -jar nome_programa.jar -r X -di DD-MM-AAAA -df DD-MM-AAAA -di1 DD-MMAAAA -df1 DD-MM-AAAA -di2 DD-MM-AAAA -df2 DD-MM-AAAA -T DD-MM-AAAA registoNumeroTotalCovid19.csv registoNumerosAcumuladosCovid19.csv matrizTransicao.txt nome_ficheiro_saida.txt");
+                    System.out.println("java -jar nome_programa.jar -r X -di DD-MM-AAAA -df DD-MMAAAA -di1 DD-MM-AAAA -df1 DD-MM-AAAA -di2 DD-MM-AAAA -df2 DD-MMAAAA registoNumerosAcumuladosCovid19.csv nome_ficheiro saida.txt");
+                    System.out.println("java -jar nome_programa.jar -T DD-MM-AAAA registoNumerosTotalCovid19.csv matrizTransicao.csv nome_ficheiro_saida.txt");
+                }
+            }
 
-            if (VerificarExtensãoFicheiro(args[args.length - 2]).equals("csv")) {
-                ficheiroEntrada = args[args.length - 2];
-            } else System.out.println("Ficheiro de entrada inválido");
+            if (existeArgumentoR == false && existeArgumentoT == true) {
+                File ficheiroEntradaTotalTemp = new File(args[args.length - 3]);
+                File ficheiroSaidaTemp = new File(args[args.length - 1]);
+                File ficheiroMatrizTemp = new File(args[args.length - 2]);
+                if (ficheiroEntradaTotalTemp.exists() && ficheiroSaidaTemp.exists() && ficheiroMatrizTemp.exists()) {
+                    ficheiroEntradaTotal = args[args.length - 3];
+                    ficheiroSaida = args[args.length - 1];
+                    ficheiroMatriz = args[args.length - 2];
+                    ficheirosValidos = true;
+                    modoPrevisao = true;
+                } else {
+                    System.out.println("Os ficheiros introduzidos não foram encontrados.");
+                }
+            }
 
-            if (VerificarExtensãoFicheiro(args[args.length - 1]).equals("txt")) {
-                ficheiroSaida = args[args.length - 1];
+            if (existeArgumentoR == true && existeArgumentoT == true) {
+                File ficheiroEntradaTotalTemp = new File(args[args.length - 4]);
+                File ficheiroEntradaTemp = new File(args[args.length - 3]);
+                File ficheiroSaidaTemp = new File(args[args.length - 1]);
+                File ficheiroMatrizTemp = new File(args[args.length - 2]);
+                if (ficheiroEntradaTemp.exists() && ficheiroSaidaTemp.exists() && ficheiroMatrizTemp.exists() && ficheiroEntradaTotalTemp.exists()) {
+                    ficheiroEntrada = args[args.length - 3];
+                    ficheiroSaida = args[args.length - 1];
+                    ficheiroMatriz = args[args.length - 2];
+                    ficheiroEntradaTotal = args[args.length - 4];
+                    ficheirosValidos = true;
+                    modoPrevisao = true;
+                } else {
+                    System.out.println("Os ficheiros introduzidos não foram encontrados.");
+                }
+                if (dataInicialExiste == true && dataFinalExiste == true && dataInicialExiste1 == true && dataFinalExiste1 == true && dataInicialExiste2 == true && dataFinalExiste2 == true){
+                    argumentosValidos = true;
+                } else {
+                    System.out.println("Argumentos inválidos! Utilize um dos seguintes sintaxes:");
+                    System.out.println();
+                    System.out.println("java -jar nome_programa.jar -r X -di DD-MM-AAAA -df DD-MM-AAAA -di1 DD-MMAAAA -df1 DD-MM-AAAA -di2 DD-MM-AAAA -df2 DD-MM-AAAA -T DD-MM-AAAA registoNumeroTotalCovid19.csv registoNumerosAcumuladosCovid19.csv matrizTransicao.txt nome_ficheiro_saida.txt");
+                    System.out.println("java -jar nome_programa.jar -r X -di DD-MM-AAAA -df DD-MMAAAA -di1 DD-MM-AAAA -df1 DD-MM-AAAA -di2 DD-MM-AAAA -df2 DD-MMAAAA registoNumerosAcumuladosCovid19.csv nome_ficheiro saida.txt");
+                    System.out.println("java -jar nome_programa.jar -T DD-MM-AAAA registoNumerosTotalCovid19.csv matrizTransicao.csv nome_ficheiro_saida.txt");
+                }
+            }
 
-            } else System.out.println("Ficheiro de saida inválido");
+            if (ficheirosValidos == true && argumentosValidos == true) {
+                int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
 
-        } else System.out.println("Quantidade de argumentos inválida");
-
-        //MostrarValoresDoDia("2020-04-05", listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas);
-
-
-
-        if (args.length < 1){
-            System.out.println("Introduza o nome do ficheiro");
-            ficheiroEntrada = sc.nextLine();
-        }
-
-        int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
-
-        Date[] listaDeDatas = new Date[numeroDeLinhas];
-        listaDeDatas = PreencherListaDeDatas(ficheiroEntrada, listaDeDatas);
-        int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
-        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 1, listaDeCasosNaoInfetados);
-        int[] listaDeInfetados = new int[numeroDeLinhas];
-        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 2, listaDeInfetados);
-        int[] listaDeHospitalizados = new int[numeroDeLinhas];
-        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 3, listaDeHospitalizados);
-        int[] listaDeInternadosUCI = new int[numeroDeLinhas];
-        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 4, listaDeInternadosUCI);
-        int[] listaDeMortes = new int[numeroDeLinhas];
-        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 5, listaDeMortes);
+                Date[] listaDeDatas = new Date[numeroDeLinhas];
+                listaDeDatas = PreencherListaDeDatas(ficheiroEntrada, listaDeDatas);
+                int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
+                listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 1, listaDeCasosNaoInfetados);
+                int[] listaDeInfetados = new int[numeroDeLinhas];
+                listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 2, listaDeInfetados);
+                int[] listaDeHospitalizados = new int[numeroDeLinhas];
+                listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 3, listaDeHospitalizados);
+                int[] listaDeInternadosUCI = new int[numeroDeLinhas];
+                listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 4, listaDeInternadosUCI);
+                int[] listaDeMortes = new int[numeroDeLinhas];
+                listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 5, listaDeMortes);
 
 
+                indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+                indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+                indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+                indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+                indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+                indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
 
 
-        if(args.length > 0) {
-            indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
-            indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
-            indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
-            indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
-            indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
-            indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
-        }
+                int modoTemporal = Integer.parseInt(resolucaoTemporal);
 
-        if (args.length < 1) {
-            System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
-            System.out.println("Se quiser sair introduza o comando sair");
-            String comando = "";
-            while (!(comando.equals("sair"))) {
-                System.out.println("1) visualizar o número total de infetados.");
-                System.out.println("2) comparar o número de casos");
-                comando = sc.nextLine();
-                switch (comando){
-                    case "1":{
-                        System.out.println("Introduza a data inicial na forma dd-MM-aaaa");
-                        dataInicial = sc.nextLine();
-                        indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
-                        System.out.println("Introduza a data final na forma dd-MM-aaaa");
-                        dataFinal = sc.nextLine();
-                        indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
-                        System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
+
+                if (indexInicio != -1 && indexFinal != -1) {
+
+                    //ANALISE SEMANAL
+                    if (modoTemporal == 1) {
+                        if (listaDeDatas[indexInicio].before(listaDeDatas[indexFinal])) {
+                            ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                        } else {
+                            System.out.println("O intervalo de datas que foi introduzido é inválido.");
+                        }
+                    }
+
+
+                    // FIM DA ANALISE SEMANAL
+
+
+                    // ANALISE DIARIA
+                    if (modoTemporal == 0) {
+                        if (listaDeDatas[indexInicio].before(listaDeDatas[indexFinal])) {
+                            MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                            MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                        } else {
+                            System.out.println("O intervalo de datas que foi introduzido é inválido.");
+                        }
+                    }
+
+
+
+                    // FIM ANALISE DIARIA
+
+                    //ANALISE MENSAL
+                    if (modoTemporal == 2) {
+                        if (listaDeDatas[indexInicio].before(listaDeDatas[indexFinal])) {
+                            int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
+                            int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
+                            int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
+                            if (qtMeses > 1) {
+                                ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                            } else
+                                System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
+                        } else {
+                            System.out.println("O intervalo de datas que foi introduzido é inválido.");
+                        }
+
+
+                    }
+                    // FIM ANALISE MENSAL
+
+                    //COMPARAÇÕES 2.2
+                    double[] medias = new double[3];
+                    double[] desvioPadrao = new double[3];
+                    System.out.println();
+                    System.out.println("infetados");
+                    CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
+                    medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
+                    desvioPadrao = CalcularDesvioPadrao(medias, listaDeInfetados, indexInicio1, indexInicio2);
+                    System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                    System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                    System.out.println();
+                    System.out.println("hospitalizados");
+                    CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                    medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                    desvioPadrao = CalcularDesvioPadrao(medias, listaDeHospitalizados, indexInicio1, indexInicio2);
+                    System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                    System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                    System.out.println();
+                    System.out.println("internados na UCI");
+                    CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                    medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                    desvioPadrao = CalcularDesvioPadrao(medias, listaDeInternadosUCI, indexInicio1, indexInicio2);
+                    System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                    System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                    System.out.println();
+                    System.out.println("obitos");
+                    CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                    medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                    desvioPadrao = CalcularDesvioPadrao(medias, listaDeMortes, indexInicio1, indexInicio2);
+                    System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                    System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                    System.out.println();
+
+                } else {
+                    System.out.println("As datas introduzidas não se encontram no ficheiro especificado.");
+                    System.out.println();
+                }
+                //FIM COMPARAÇÕES 2.2
+
+
+            }
+
+            //INICIO PREVISOES 2.3
+
+            if (modoPrevisao == true){
+
+                double [][] matrizProbalidades = LerFicheiroMatriz(ficheiroMatriz);
+                int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntradaTotal) - 1;
+                Date[] listaDeDatas = new Date[numeroDeLinhas];
+                listaDeDatas = PreencherListaDeDatas(ficheiroEntradaTotal, listaDeDatas);
+                int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
+                listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntradaTotal, 1, listaDeCasosNaoInfetados);
+                int[] listaDeInfetados = new int[numeroDeLinhas];
+                listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntradaTotal, 2, listaDeInfetados);
+                int[] listaDeHospitalizados = new int[numeroDeLinhas];
+                listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntradaTotal, 3, listaDeHospitalizados);
+                int[] listaDeInternadosUCI = new int[numeroDeLinhas];
+                listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(ficheiroEntradaTotal, 4, listaDeInternadosUCI);
+                int[] listaDeMortes = new int[numeroDeLinhas];
+                listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntradaTotal, 5, listaDeMortes);
+
+                int indexDataMaisProxima = ProcurarDataMaisProxima(dataPrevisao, listaDeDatas);
+
+
+
+            }
+
+
+
+            //FIM PREVISOES 2.3
+            /****************************************************************
+             *                                                              *
+             *                   FIM MODO NÃO INTERATIVO                    *
+             *                                                              *
+             ****************************************************************/
+
+        } else {
+            System.out.println("Modo interativo iniciado.");
+
+
+            /****************************************************************
+             *                                                              *
+             *                    INICIO MODO INTERATIVO                    *
+             *                                                              *
+             ****************************************************************/
+
+
+
+            if (args.length < 1) {
+                String nomeDoFicheiroDeOutput = "ficheiroDeOutput.csv";
+                PrintWriter pw = new PrintWriter(nomeDoFicheiroDeOutput);
+                String comando = "";
+                System.out.println("Introduza o nome do ficheiro");
+                ficheiroEntrada = sc.nextLine();
+                File ficheiroEntradaTemp = new File(ficheiroEntrada);
+                while (!(ficheiroEntradaTemp.exists())) {
+                    System.out.println("O ficheiro introduzido não é valido, insira um ficheiro valido para começar, ou escreva sair se quiser sair do programa");
+                    ficheiroEntrada = sc.nextLine();
+                    if (ficheiroEntrada.equals("sair")) {
+                        break;
+                    }
+                    ficheiroEntradaTemp = new File(ficheiroEntrada);
+
+                }
+                if (ficheiroEntradaTemp.exists()) {
+                    while (!(comando.equals("sair"))) {
+
+                        int numeroDeLinhas = ContarLinhasDoFicheiro(ficheiroEntrada) - 1;
+                        Date[] listaDeDatas = new Date[numeroDeLinhas];
+                        listaDeDatas = PreencherListaDeDatas(ficheiroEntrada, listaDeDatas);
+                        int[] listaDeCasosNaoInfetados = new int[numeroDeLinhas];
+                        listaDeCasosNaoInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 1, listaDeCasosNaoInfetados);
+                        int[] listaDeInfetados = new int[numeroDeLinhas];
+                        listaDeInfetados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 2, listaDeInfetados);
+                        int[] listaDeHospitalizados = new int[numeroDeLinhas];
+                        listaDeHospitalizados = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 3, listaDeHospitalizados);
+                        int[] listaDeInternadosUCI = new int[numeroDeLinhas];
+                        listaDeInternadosUCI = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 4, listaDeInternadosUCI);
+                        int[] listaDeMortes = new int[numeroDeLinhas];
+                        listaDeMortes = PreencherValoresDosDadosPrimeiraFase(ficheiroEntrada, 5, listaDeMortes);
+
+                        System.out.println("Se quiser sair introduza o comando sair");
+                        System.out.println("Introduza o número da alínea que quer usar");
+                        System.out.println("1) visualizar o número total de infetados.");
+                        System.out.println("2) comparar o número de casos");
+                        System.out.println("3) mudar de ficheiro de entrada");
                         comando = sc.nextLine();
                         switch (comando) {
-                            case "0": {
-                                MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-                                MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-                                System.out.println();
-                                break;
-                            }
                             case "1": {
-                                ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+
+                                System.out.println("Introduza a data inicial na forma dd-MM-aaaa");
+                                dataInicial = sc.nextLine();
+
+                                while (ValidarDatasInseridas(dataInicial, listaDeDatas) == false && !(dataInicial.equals("sair"))) {
+                                    System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                    dataInicial = sc.nextLine();
+                                }
+                                if (!(dataInicial.equals("sair"))) {
+                                    System.out.println("Introduza a data final na forma dd-MM-aaaa");
+                                    dataFinal = sc.nextLine();
+
+                                    while (ValidarDatasInseridas(dataFinal, listaDeDatas) == false && !(dataFinal.equals("sair"))) {
+                                        System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                        dataFinal = sc.nextLine();
+                                    }
+                                    if (!(dataInicial.equals("sair")) && !(dataFinal.equals("sair"))) {
+
+                                        indexInicio = ProcurarPosicaoData(dataInicial, listaDeDatas);
+                                        indexFinal = ProcurarPosicaoData(dataFinal, listaDeDatas);
+                                        System.out.println("Para modo diario introduza 0, para modo semanal introduza 1, para modo mensal introduza 2 ");
+                                        comando = sc.nextLine();
+                                        switch (comando) {
+                                            case "0": {
+                                                MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                                                MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
+                                                System.out.println();
+                                                break;
+                                            }
+                                            case "1": {
+                                                ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                                                System.out.println();
+                                                break;
+                                            }
+                                            case "2": {
+                                                int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
+                                                int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
+                                                int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
+                                                if (qtMeses > 1) {
+                                                    ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
+                                                } else
+                                                    System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
                                 break;
                             }
                             case "2": {
-                                int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
-                                int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
-                                int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
-                                if (qtMeses > 1) {
-                                    ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
-                                } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
+                                System.out.println("Introduza a data inicial do primeiro periodo temporal na forma dd-MM-aaaa");
+                                dataInicial1 = sc.nextLine();
+
+                                while (ValidarDatasInseridas(dataInicial1,listaDeDatas)==false && !(dataInicial1.equals("sair"))){
+                                    System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                    dataInicial1= sc.nextLine();
+                                }
+                                if (!(dataInicial1.equals("sair"))) {
+                                    System.out.println("Introduza a data final do primeiro periodo temporal na forma dd-MM-aaaa");
+                                    dataFinal1 = sc.nextLine();
+
+                                    while (ValidarDatasInseridas(dataFinal1,listaDeDatas)==false && !(dataFinal1.equals("sair"))){
+                                        System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                        dataFinal1 = sc.nextLine();
+                                    }
+                                    if (!(dataInicial1.equals("sair")) && !(dataFinal1.equals("sair"))) {
+                                        System.out.println("Introduza a data inicial do segundo periodo temporal na forma dd-MM-aaaa");
+                                        dataInicial2 = sc.nextLine();
+
+                                        while (ValidarDatasInseridas(dataInicial2,listaDeDatas)==false && !(dataInicial2.equals("sair"))){
+                                            System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                            dataInicial2 = sc.nextLine();
+                                        }
+                                        if (!(dataInicial1.equals("sair")) && !(dataFinal1.equals("sair")) && !(dataInicial2.equals("sair"))){
+                                        System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
+                                        dataFinal2 = sc.nextLine();
+
+                                            while (ValidarDatasInseridas(dataFinal2,listaDeDatas)==false && !(dataFinal2.equals("sair"))){
+                                                System.out.println("A data inseirda não é valida, ou não pertence ao ficheiro de entrada, insira uma nova data, ou escreva sair se quiser sair do programa");
+                                                dataFinal2 = sc.nextLine();
+                                            }
+                                            if (!(dataInicial1.equals("sair")) && !(dataFinal1.equals("sair")) && !(dataInicial2.equals("sair")) && !(dataFinal2.equals("sair"))){
+
+                                        indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
+                                        indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
+                                        indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
+                                        indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
+                                        double[] medias = new double[3];
+                                        double[] desvioPadrao = new double[3];
+                                        System.out.println();
+                                        System.out.println("infetados");
+                                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
+                                        medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
+                                        desvioPadrao = CalcularDesvioPadrao(medias, listaDeInfetados, indexInicio1, indexInicio2);
+                                        System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                        System.out.println();
+                                        System.out.println("hospitalizados");
+                                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                                        medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                                        desvioPadrao = CalcularDesvioPadrao(medias, listaDeHospitalizados, indexInicio1, indexInicio2);
+                                        System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                        System.out.println();
+                                        System.out.println("internados na UCI");
+                                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                                        medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                                        desvioPadrao = CalcularDesvioPadrao(medias, listaDeInternadosUCI, indexInicio1, indexInicio2);
+                                        System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                        System.out.println();
+                                        System.out.println("obitos");
+                                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                                        medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                                        desvioPadrao = CalcularDesvioPadrao(medias, listaDeMortes, indexInicio1, indexInicio2);
+                                        System.out.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                        System.out.println();
+                                        System.out.println("Quer gravar os resultados num ficheiro?");
+                                        comando = sc.nextLine();
+                                        switch (comando) {
+                                            case "sim": {
+                                                // String nomeDoFicheiroDeOutput = "";
+                                                System.out.println("Introduza o nome do ficheiro de output");
+                                                //  nomeDoFicheiroDeOutput = sc.nextLine();
+
+                                                pw.println("infetados");
+                                                CompararPeriodosDeTempoParaFicheiro(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados, listaDeDatas, pw);
+                                                medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                                                desvioPadrao = CalcularDesvioPadrao(medias, listaDeHospitalizados, indexInicio1, indexInicio2);
+                                                pw.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                                pw.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                                pw.println();
+                                                pw.println("hospitalizados");
+                                                CompararPeriodosDeTempoParaFicheiro(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados, listaDeDatas, pw);
+                                                medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
+                                                desvioPadrao = CalcularDesvioPadrao(medias, listaDeHospitalizados, indexInicio1, indexInicio2);
+                                                pw.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                                pw.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                                pw.println();
+                                                pw.println("internados na UCI");
+                                                CompararPeriodosDeTempoParaFicheiro(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI, listaDeDatas, pw);
+                                                medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
+                                                desvioPadrao = CalcularDesvioPadrao(medias, listaDeInternadosUCI, indexInicio1, indexInicio2);
+                                                pw.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                                pw.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                                pw.println();
+                                                pw.println("obitos");
+                                                CompararPeriodosDeTempoParaFicheiro(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes, listaDeDatas, pw);
+                                                medias = MostrarMedias(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
+                                                desvioPadrao = CalcularDesvioPadrao(medias, listaDeMortes, indexInicio1, indexInicio2);
+                                                pw.printf("medias: %.4f     %.4f     %.4f\n", medias[0], medias[1], medias[2]);
+                                                pw.printf("Desvio padrão: %.4f     %.4f     %.4f\n", desvioPadrao[0], desvioPadrao[1], desvioPadrao[2]);
+                                                pw.println();
+
+                                                break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                            case "3": {
+                                System.out.println("Introduza o nome de um novo ficheiro de entrada valido");
+                                String ficheiroEntradaBackup = ficheiroEntrada;
+                                ficheiroEntrada = sc.nextLine();
+                                ficheiroEntradaTemp = new File(ficheiroEntrada);
+                                while (!(ficheiroEntradaTemp.exists()) && !(ficheiroEntrada.equals("sair"))){
+                                    System.out.println("O ficheiro introduzido não era valido, introduza um ficheiro valido, se quiser continuar a usar o ficheiro anterior escreva sair, ou escreva o nome deste");
+                                    ficheiroEntrada = sc.nextLine();
+                                    ficheiroEntradaTemp = new File(ficheiroEntrada);
+                                }
+                                if (ficheiroEntrada.equals("sair")){
+                                    ficheiroEntrada = ficheiroEntradaBackup;
+                                }
                                 break;
                             }
                         }
-                        break;
                     }
-                    case "2":{
-                        System.out.println("Introduza a data inicial do primeiro periodo temporal na forma dd-MM-aaaa");
-                        dataInicial1 = sc.nextLine();
-                        indexInicio1 = ProcurarPosicaoData(dataInicial1, listaDeDatas);
-                        System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
-                        dataFinal1 = sc.nextLine();
-                        indexFinal1 = ProcurarPosicaoData(dataFinal1, listaDeDatas);
-                        System.out.println("Introduza a data inicial do segundo periodo temporal na forma dd-MM-aaaa");
-                        dataInicial2 = sc.nextLine();
-                        indexInicio2 = ProcurarPosicaoData(dataInicial2, listaDeDatas);
-                        System.out.println("Introduza a data final do primeiro periodo temporar na forma dd-MM-aaaa");
-                        dataFinal2 = sc.nextLine();
-                        indexFinal2 = ProcurarPosicaoData(dataFinal2, listaDeDatas);
-                        double[] medias = new double[3];
-                        double[] desvioPadrao = new double[3];
-                        System.out.println();
-                        System.out.println("infetados");
-                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
-                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInfetados);
-                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeInfetados,indexInicio1,indexInicio2);
-                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-                        System.out.println();
-                        System.out.println("hospitalizados");
-                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
-                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeHospitalizados);
-                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeHospitalizados,indexInicio1,indexInicio2);
-                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-                        System.out.println();
-                        System.out.println("internados na UCI");
-                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
-                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInternadosUCI);
-                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeInternadosUCI,indexInicio1,indexInicio2);
-                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-                        System.out.println();
-                        System.out.println("obitos");
-                        CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
-                        medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeMortes);
-                        desvioPadrao = CalcularDesvioPadrao(medias,listaDeMortes,indexInicio1,indexInicio2);
-                        System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-                        System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-                        System.out.println();
-                    }
+                   pw.close();
+                }else {
+                    System.out.println("Saida por escolha do utilizador");
                 }
             }
         }
+        /***************************************************************
+         *                                                              *
+         *                     FIM MODO INTERATIVO                      *
+         *                                                              *
+         ****************************************************************/
 
 
-        int modoTemporal = Integer.parseInt(resolucaoTemporal);;
-
-//ANALISE SEMANAL
-        if (modoTemporal == 1) {
-            ModoSemanalMostrarDados(indexFinal, indexInicio, mensagemSegundaFeiraReferencia, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
-        }
-
-// FIM DA ANALISE SEMANAL
-
-
-// ANALISE DIARIA
-        if (modoTemporal == 0) {
-            MostrarValoresDoDia(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-            MostrarNovosCasosDiarios(listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes, listaDeDatas, indexFinal, indexInicio);
-        }
-
-        // FIM ANALISE DIARIA
-
-        //ANALISE MENSAL
-        if (modoTemporal == 2) {
-            int indexPrimeiroDiaMes = ProcurarPrimeiroDiaMes(indexInicio, indexFinal, listaDeDatas);
-            int indexUltimoDiaMes = ProcurarUltimoDiaMes(indexInicio, indexFinal, listaDeDatas);
-            int qtMeses = (CalcularQuantidadeDeMesesParaAvaliar(indexPrimeiroDiaMes, indexUltimoDiaMes, listaDeDatas));
-            if (qtMeses > 1) {
-                ModoMensalMostrarDados(indexPrimeiroDiaMes, indexUltimoDiaMes, qtMeses, listaDeDatas, listaDeInfetados, listaDeHospitalizados, listaDeInternadosUCI, listaDeMortes);
-            } else System.out.println("Impossivel fazer a comparação mensal, especifique um intervalo de datas maior");
-
-        }
-        // FIM ANALISE MENSAL
-
-
-        //COMPARAÇÕES 2.2
-        if (args.length > 0) {
-            double[] medias = new double[3];
-            double[] desvioPadrao = new double[3];
-            System.out.println();
-            System.out.println("infetados");
-            CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInfetados);
-            medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInfetados);
-            desvioPadrao = CalcularDesvioPadrao(medias,listaDeInfetados,indexInicio1,indexInicio2);
-            System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-            System.out.println();
-            System.out.println("hospitalizados");
-            CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeHospitalizados);
-            medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeHospitalizados);
-            desvioPadrao = CalcularDesvioPadrao(medias,listaDeHospitalizados,indexInicio1,indexInicio2);
-            System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-            System.out.println();
-            System.out.println("internados na UCI");
-            CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeInternadosUCI);
-            medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeInternadosUCI);
-            desvioPadrao = CalcularDesvioPadrao(medias,listaDeInternadosUCI,indexInicio1,indexInicio2);
-            System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-            System.out.println();
-            System.out.println("obitos");
-            CompararPeriodosDeTempo(indexInicio1, indexFinal1, indexInicio2, indexFinal2, listaDeMortes);
-            medias = MostrarMedias(indexInicio1,indexFinal1,indexInicio2,indexFinal2,listaDeMortes);
-            desvioPadrao = CalcularDesvioPadrao(medias,listaDeMortes,indexInicio1,indexInicio2);
-            System.out.printf("medias: %.4f     %.4f     %.4f\n",medias[0],medias[1],medias[2]);
-            System.out.printf("Desvio padrão: %.4f     %.4f     %.4f\n",desvioPadrao[0],desvioPadrao[1],desvioPadrao[2]);
-            System.out.println();
-
-        }
-
-        //FIM COMPARAÇÕES 2.2
 
     }
 
@@ -370,18 +654,7 @@ public class Projeto {
         return counter;
     }
 
-    public static String VerificarExtensãoFicheiro(String nomeFicheiro) {
-        String ext = "";
-
-        int i = nomeFicheiro.lastIndexOf('.');
-        if (i > 0) {
-            ext = nomeFicheiro.substring(i + 1);
-        }
-
-        return ext;
-    }
     //ANALISE SEMANAL
-//problemas com segunda a domingo, porem funciona de segunda a segunda
 
     public static void ModoSemanalMostrarDados(int indexFinal,int indexInicio,String mensagemSegundaFeiraReferencia,Date[] listaDeDatas,int[] listaDeInfetados,int[] listaDeHospitalizados,int[] listaDeInternadosUCI,int[] listaDeMortes) {
         if (indexFinal - indexInicio >= 7) {
@@ -698,4 +971,101 @@ public class Projeto {
 
         return variacao;
     }
+
+    public static void CompararPeriodosDeTempoParaFicheiro (int indexInicio1,int indexFinal1,int indexInicio2,int indexFinal2,int[] arrayDeDados,Date[] listaDeDatas,PrintWriter pw) throws FileNotFoundException {
+
+
+        while (indexFinal1 > indexInicio1 && indexFinal2 > indexInicio2) {
+
+            pw.print(formato.format(listaDeDatas[indexInicio1])+ ": " + arrayDeDados[indexInicio1] + "     ");
+            pw.print(formato.format(listaDeDatas[indexInicio2])+ ": " + arrayDeDados[indexInicio2] + "     ");
+            pw.println(("Diferença entre dias"+ ": " + ((arrayDeDados[indexInicio2]) - (arrayDeDados[indexInicio1]))));
+            indexInicio1++;
+            indexInicio2++;
+        }
+    }
+
+    //FIM 2.2
+
+    //INICIO PREVISAO
+    public static double[][] MultiplicarMatrizes(double[][] primeiraMatriz, double[][] segundaMatriz) {
+        int qtLinhas1 = primeiraMatriz.length;
+        int qtColunas1 = primeiraMatriz[0].length;
+        int qtColunas2 = segundaMatriz[0].length;
+
+        double[][] matrizResultante = new double[qtLinhas1][qtColunas2];
+
+        for(int i = 0; i < qtLinhas1; i++) {
+            for (int j = 0; j < qtColunas2; j++) {
+                for (int k = 0; k < qtColunas1; k++) {
+                    matrizResultante[i][j] += primeiraMatriz[i][k] * segundaMatriz[k][j];
+                }
+            }
+        }
+        return matrizResultante;
+    }
+
+    public static void MostrarValoresMatriz(double[][] matriz) {
+        for (int i = 0; i < matriz.length; i++) {
+            for (int j = 0; j < matriz[i].length; j++) {
+                System.out.println(i + " " + j + ": " + matriz[i][j]);
+            }
+        }
+    }
+
+    public static double[][] LerFicheiroMatriz(String ficheiroMatriz) throws FileNotFoundException {
+        Scanner fin = new Scanner(new File(ficheiroMatriz));
+        Scanner fin1 = new Scanner(new File(ficheiroMatriz));
+        int qtLinhas = 0;
+        int qtLinhasValidas = 0;
+        String ultimaLinha = "";
+        while (fin.hasNextLine()) {
+            String linha = fin.nextLine();
+            if (linha != ""){
+                ultimaLinha = linha;
+                qtLinhasValidas++;
+            }
+            qtLinhas++;
+        }
+        fin.close();
+
+        int tamanhoMatriz = (int) Math.sqrt(qtLinhasValidas);
+        double[][] matrizProbalidades = new double[tamanhoMatriz][tamanhoMatriz];
+
+        while (fin1.hasNextLine()){
+            String linha = fin1.nextLine();
+            if (linha != ""){
+                String[] valoresLinha = linha.split("=");
+                int i = Integer.parseInt(valoresLinha[0].split("")[1]) - 1;
+                int j = Integer.parseInt(valoresLinha[0].split("")[2]) - 1;
+                double valor = Double.parseDouble(valoresLinha[1]);
+                matrizProbalidades[i][j] = valor;
+            }
+        }
+
+        fin1.close();
+
+        return matrizProbalidades;
+    }
+
+    public static int ProcurarDataMaisProxima(String dataPrevisao, Date[] listaDeDatas) throws ParseException {
+        int posicaoData = ProcurarPosicaoData(dataPrevisao, listaDeDatas);
+        if (posicaoData == -1){
+            posicaoData = listaDeDatas.length - 1;
+        }
+
+        return posicaoData;
+    }
+
+    public static boolean ValidarDatasInseridas(String data, Date[] listaDeDatas) throws ParseException {
+
+        boolean resultado = false;
+        for (int i = 0; i < listaDeDatas.length; i++) {
+            if (data.equals(formato3.format(listaDeDatas[i]))){
+                resultado = true;
+            }
+        }
+        return resultado;
+    }
+
 }
